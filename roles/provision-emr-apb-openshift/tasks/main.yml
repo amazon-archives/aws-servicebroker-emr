@@ -1,0 +1,55 @@
+- name: Launch RDS MySQL cluster
+  cloudformation:
+   aws_access_key: "{{ aws_access_key }}"
+   aws_secret_key: "{{ aws_secret_key }}"
+   stack_name: "apb-RDS-{{ stack_identifier }}"
+   state: "present"
+   region: "{{ region }}"
+   disable_rollback: false
+   template: "{{ role_path }}/files/rds-mysql.yml"
+   template_parameters:
+     ApplicationName: "{{ ApplicationName }}"
+     VpcId: "{{ VpcId }}"
+     NumberOfAvailabilityZones: "{{ NumberOfAvailabilityZones | string }}"
+     PreferredBackupWindow: "{{ PreferredBackupWindow }}"
+     PreferredMaintenanceWindowDay: "{{ PreferredMaintenanceWindowDay }}"
+     PreferredMaintenanceWindowStartTime: "{{ PreferredMaintenanceWindowStartTime }}"
+     PreferredMaintenanceWindowEndTime: "{{ PreferredMaintenanceWindowEndTime }}"
+     MonitoringInterval: "{{ MonitoringInterval | string }}"
+     AvailabilityZones: "{{ AvailabilityZones }}"
+     CidrBlocks: "{{ CidrBlocks }}"
+     AccessCidr: "{{ AccessCidr }}"
+     AllocatedStorageAndIops: "{{ AllocatedStorageAndIops }}"
+     MasterUsername: "{{ MasterUsername }}"
+     MasterUserPassword: "{{ MasterUserPassword }}"
+     AllowMajorVersionUpgrade: "{{ AllowMajorVersionUpgrade }}"
+     StorageType: "{{ StorageType }}"
+     MultiAZ: "{{ MultiAZ }}"
+     AutoMinorVersionUpgrade: "{{ AutoMinorVersionUpgrade }}"
+     StorageEncrypted: "{{ StorageEncrypted }}"
+     BackupRetentionPeriod: "{{ BackupRetentionPeriod | string }}"
+     PortNumber: "{{ PortNumber | string }}"
+     CopyTagsToSnapshot: "{{ CopyTagsToSnapshot }}"
+     PubliclyAccessible: "{{ PubliclyAccessible }}"
+     DBInstanceClass: "{{ DBInstanceClass }}"
+     DBName: "{{ DBName }}"
+     EngineVersion: "{{ EngineVersion }}"
+     MysqlServerTimezone: "{{ MysqlServerTimezone }}"
+   tags:
+     Stack: "ansible-cloudformation"
+     Application: "ansible-rds-mysql"
+     Description: "{{ ansible_user_id }} RDS {{ ApplicationName }}"
+  register: rds
+
+- name: Recording database endpoint address
+  set_fact:
+    rds_endpoint_address: "{{ rds.stack_outputs.EndpointAddress }}"
+
+- name: Encode bind credentials
+  shell: 'echo "{\"MYSQL_HOST\": \"{{ rds_endpoint_address }}\", \"MYSQL_PORT\": \"{{ PortNumber }}\", \"MYSQL_USER\": \"{{ MasterUsername }}\", \"MYSQL_PASSWORD\": \"{{ MasterUserPassword }}\", \"MYSQL_DATABASE\": \"{{ DBName }}\"}" | base64 -w 0'
+  register: encoded_bind_credentials
+
+- name: Write bind credentials to filesystem
+  copy:
+   content="<BIND_CREDENTIALS>{{ encoded_bind_credentials.stdout }}</BIND_CREDENTIALS>"
+   dest=/etc/apb/bind-creds
