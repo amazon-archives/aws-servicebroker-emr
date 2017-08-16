@@ -1,10 +1,9 @@
-id: 0aaafc10-132b-41a8-a58c-73268ff1006a
 name: emr-apb
 image: ansibleplaybookbundle/emr-apb
 description: 'Managed Hadoop cluster in the cloud with just a few clicks.'
 tags:
   - amazon
-  - database
+  - emr
 bindable: true
 async: optional
 parameters:
