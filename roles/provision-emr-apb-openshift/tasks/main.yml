@@ -8,14 +8,14 @@
    disable_rollback: false
    template: "{{ role_path }}/files/emrcluster.yml"
    template_parameters:
-     Applications: "{{ Applications }}"
+     Applications: "{{ ApplicationName }}"
      EMRClusterName: "{{ EMRClusterName }}"
      KeyName: "{{ KeyName}}"
      MasterInstanceType: "{{ MasterInstanceType }}"
      CoreInstanceType: "{{ CoreInstanceType }}"
-     NumberOfCoreInstances: "{{ NumberOfCoreInstances }}"
-     SubnetID: "{{SubnetID }}"
-     LogUri: "{{LogUri}}"
+     NumberOfCoreInstances: "{{ NumberOfCoreInstances | string }}"
+     SubnetID: "{{ SubnetID }}"
+     LogUri: "{{ LogUri }}"
      S3DataUri: "{{ S3DataUri }}"
      ReleaseLabel: "{{ ReleaseLabel }}"
    tags:
