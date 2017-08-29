@@ -11,82 +11,79 @@ plans:
     description: 'EMR Cluster'
     free: false
     parameters:
-      - stack_identifier:
+      - name: stack_identifier
         required: true
         title: Unique Stack Identifier
         description: 'Unique identifier to be included in the CloudFormation Stack Name to prevent naming collisions. Must only contain alphanumeric characters and hyphens. (e.g. "sample-emr-stack", "production-emr-08-2017")'
         type: string
-      - aws_access_key:
+      - name: aws_access_key
         required: true
         title: AWS Access Key
         description: 'AWS Access Key to authenticate to AWS with.'
         type: string
-      - aws_secret_key:
+      - name: aws_secret_key
         required: true
         title: AWS Secret Key
         description: 'AWS Secret Key to authenticate to AWS with.'
         type: string
-      - region:
+      - name: region
         required: true
         title: AWS Region
-        description: 'AWS Region to create RDSEMR Cluster in.'
+        description: 'AWS Region to create EMR Cluster in.'
         type: string
         default: "us-west-2"
-      - Applications:
+      - name: ApplicationName
         required: true
         title: Application Name
         description: 'EMR Cluster Application to be installed (e.g. "Spark", "Hbase")'
         type: string
         default: "Spark"
-      - EMRClusterName:
+      - name: EMRClusterName
         required: true
         title: EMR Cluster Name
         description: 'Name of the cluster'
         type: string
         default: "EMRCluster1"
-      - KeyName:
+      - name: KeyName
         required: true
         title: EC2 Key Pair
         description: 'Key Pair for SSH access to cluster'
         type: string
         default: "MyKeyPair"
-      - MasterInstanceType:
+      - name: MasterInstanceType
         required: true
         title: Master Instance Type
         description: 'EC2 instance type for Master Node'
         type: string
         default: "m3.xlarge"
-      - CoreInstanceType:
+      - name: CoreInstanceType
         required: true
         title: Core Instance Type
         description: 'EC2 instance type for Core Nodes'
         type: string
         default: "m3.xlarge"
-      - NumberOfCoreInstances:
+      - name: NumberOfCoreInstances
         required: true
         title: Number of Core Nodes
         description: 'The number of core nodes to be launched'
-        type: Number
-        default: "2"
-      - SubnetID:
+        type: int
+        default: 2
+      - name: SubnetID
         required: true
         title: Subnet ID
-        description: 'VPC subnet node are to be launched into'
+        description: 'VPC subnet node are to be launched into (e.g. "subnet-dba430ad")'
         type: string
-        default: "subnet-dba430ad"
-      - LogUri:
+      - name: LogUri
         required: true
         title: S3 log bucket
-        description: 'S3 url for bucket to be used for logging'
+        description: 'S3 url for bucket to be used for logging (e.g. "s3://emrclusterlogbucket/")'
         type: string
-        default: "s3://emrclusterlogbucket/"
-      - S3DataUri:
+      - name: S3DataUri
         required: true
         title: S3 data bucket
-        description: 'S3 url for bucket to be used for data'
+        description: 'S3 url for bucket to be used for data (e.g. "s3://emrclusterdatabucket/")'
         type: string
-        default: "s3://emrclusterdatabucket/"
-      - ReleaseLabel:
+      - name: ReleaseLabel
         required: true
         title: Version of EMR to be used
         description: 'EMR release'
@@ -97,3 +94,4 @@ plans:
       longDescription: "Amazon Elastic Map reduce  (Amazon EMR) provides a managed Hadoop framework that makes it easy, fast, and cost-effective to process vast amounts of data across dynamically scalable Amazon EC2 instances."
       imageUrl: "https://d0.awsstatic.com/cloud-storage/Deck_Databases.png"
       documentationUrl: "https://aws.amazon.com/emr/"
+      cost: $0.00

@@ -8,7 +8,7 @@ Parameters:
   KeyName:
     Description: Must be an existing Keyname
     Type: String
-  MasterInstacneType:
+  MasterInstanceType:
     Description: Instance type to be used for the master instance.
     Type: String
     Default: m3.xlarge
@@ -46,10 +46,10 @@ Parameters:
       - Hbase
 Mappings: {}
 Conditions:
-  Spark: !Equals 
+  Spark: !Equals
     - !Ref Applications
     - Spark
-  Hbase: !Equals 
+  Hbase: !Equals
     - !Ref Applications
     - Hbase
 Resources:
@@ -62,11 +62,11 @@ Resources:
     Properties:
       Applications:
         - Name: Ganglia
-        - !If 
+        - !If
           - Spark
           - Name: Spark
           - !Ref 'AWS::NoValue'
-        - !If 
+        - !If
           - Hbase
           - Name: Hbase
           - !Ref 'AWS::NoValue'
@@ -82,7 +82,7 @@ Resources:
         Ec2SubnetId: !Ref SubnetID
         MasterInstanceGroup:
           InstanceCount: 1
-          InstanceType: !Ref MasterInstacneType
+          InstanceType: !Ref MasterInstanceType
           Market: ON_DEMAND
           Name: Master
         CoreInstanceGroup:
