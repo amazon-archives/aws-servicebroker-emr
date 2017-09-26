@@ -6,6 +6,11 @@ tags:
   - emr
 bindable: true
 async: optional
+metadata:
+  displayName: "Amazon EMR (APB)"
+  longDescription: "Amazon Elastic Map reduce  (Amazon EMR) provides a managed Hadoop framework that makes it easy, fast, and cost-effective to process vast amounts of data across dynamically scalable Amazon EC2 instances."
+  imageUrl: "https://s3.amazonaws.com/thp-aws-icons-dev/Analytics_AmazonEMR_LARGE.png"
+  documentationUrl: "https://aws.amazon.com/emr/"
 plans:
   - name: default
     description: 'EMR Cluster'
@@ -90,8 +95,6 @@ plans:
         type: string
         default: "emr-5.7.0"
     metadata:
-      displayName: "Amazon EMR"
-      longDescription: "Amazon Elastic Map reduce  (Amazon EMR) provides a managed Hadoop framework that makes it easy, fast, and cost-effective to process vast amounts of data across dynamically scalable Amazon EC2 instances."
-      imageUrl: "https://d0.awsstatic.com/cloud-storage/Deck_Databases.png"
-      documentationUrl: "https://aws.amazon.com/emr/"
+      displayName: "Standard"
+      longDescription: ""
       cost: $0.00

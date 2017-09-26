@@ -23,3 +23,11 @@
      Application: "ansible-emr"
      Description: "{{ ansible_user_id }} EMR {{ ApplicationName }}"
   register: emr
+- name: Check for CloudFormation error logs
+  debug:
+    var: emr.log
+- name: Encode bind credentials
+  asb_encode_binding:
+    fields:
+      RECORD_NAME: "{{ emr.stack_outputs.S3DataUri }}"
+  when: emr.log | length < 1

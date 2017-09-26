@@ -134,4 +134,6 @@ Resources:
       Path: /
       Roles:
         - !Ref EMRClusterinstanceProfileRole
-Outputs: {}
+Outputs:
+  S3DataUri:
+    Value: !Ref S3DataUri
