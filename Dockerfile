@@ -6,7 +6,7 @@ RUN yum -y install python-boto3 && yum clean all
 COPY roles /opt/ansible/roles
 COPY playbooks /opt/apb/actions
 
-LABEL "com.redhat.apb.version"="0.1.0"
+LABEL "com.redhat.apb.version"="1.0.0"
 LABEL "com.redhat.apb.spec"=\
 "bmFtZTogZW1yLWFwYgppbWFnZTogYW5zaWJsZXBsYXlib29rYnVuZGxlL2Vtci1hcGIKZGVzY3Jp\
 cHRpb246ICdNYW5hZ2VkIEhhZG9vcCBjbHVzdGVyIGluIHRoZSBjbG91ZCB3aXRoIGp1c3QgYSBm\
