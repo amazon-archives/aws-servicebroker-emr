@@ -36,7 +36,7 @@ plans:
         title: AWS Region
         description: 'AWS Region to create EMR Cluster in.'
         type: enum
-         enum:
+        enum:
            - ap-northeast-1
            - ap-northeast-2
            - ap-south-1
