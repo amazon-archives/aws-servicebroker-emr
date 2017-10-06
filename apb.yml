@@ -1,5 +1,5 @@
+version: 1.0
 name: emr-apb
-image: ansibleplaybookbundle/emr-apb
 description: 'Managed Hadoop cluster in the cloud with just a few clicks.'
 tags:
   - amazon
