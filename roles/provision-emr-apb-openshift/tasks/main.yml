@@ -1,33 +1,54 @@
 - name: Launch EMR cluster
   cloudformation:
-   aws_access_key: "{{ aws_access_key }}"
-   aws_secret_key: "{{ aws_secret_key }}"
-   stack_name: "apb-emr-{{ stack_identifier }}"
-   state: "present"
-   region: "{{ region }}"
-   disable_rollback: false
-   template: "{{ role_path }}/files/emrcluster.yml"
-   template_parameters:
-     Applications: "{{ ApplicationName }}"
-     EMRClusterName: "{{ EMRClusterName }}"
-     KeyName: "{{ KeyName}}"
-     MasterInstanceType: "{{ MasterInstanceType }}"
-     CoreInstanceType: "{{ CoreInstanceType }}"
-     NumberOfCoreInstances: "{{ NumberOfCoreInstances | string }}"
-     SubnetID: "{{ SubnetID }}"
-     LogUri: "{{ LogUri }}"
-     S3DataUri: "{{ S3DataUri }}"
-     ReleaseLabel: "{{ ReleaseLabel }}"
-   tags:
-     Stack: "ansible-cloudformation"
-     Application: "ansible-emr"
-     Description: "{{ ansible_user_id }} EMR {{ ApplicationName }}"
+    stack_name: "apb-emr-{{ stack_suffix }}"
+    state: "present"
+    region: "{{ region }}"
+    disable_rollback: false
+    template: "{{ role_path }}/files/emrcluster.yml"
+    role_arn: "{{ aws_cloudformation_role_arn }}"
+    template_parameters:
+      Applications: "{{ EMRApplication }}"
+      EMRClusterName: "{{ EMRClusterName }}"
+      KeyName: "{{ KeyName}}"
+      MasterInstanceType: "{{ MasterInstanceType }}"
+      CoreInstanceType: "{{ CoreInstanceType }}"
+      NumberOfCoreInstances: "{{ NumberOfCoreInstances | string }}"
+      EMRCidr: "{{ EMRCidr }}"
+      VpcId: "{{ VpcId }}"
+      ReleaseLabel: "{{ ReleaseLabel }}"
+    tags:
+      ServiceBrokerId: "{{ application_name }}"
   register: emr
+- name: Create IAM user
+  iam:
+    iam_type: user
+    name: "apb-emr-iam-{{ stack_suffix }}"
+    state: present
+    access_key_state: create
+  register: iam_output
+- name: Generate IAM policy temporary json file
+  template:
+    src: "{{ role_path }}/files/EMRAccessPolicy.json.j2"
+    dest: "/tmp/{{ emr.stack_outputs.EmrEndpoint | checksum }}.json"
+- name: Attach IAM policy
+  iam_policy:
+    iam_type: user
+    iam_name: "apb-emr-iam-{{ stack_suffix }}"
+    policy_name: "EMR-APB-{{ stack_suffix }}"
+    state: present
+    policy_document: "/tmp/{{ emr.stack_outputs.EmrEndpoint | checksum }}.json"
+- name: Remove IAM policy temporary json file
+  file:
+    state: absent
+    path: /tmp/{{ emr.stack_outputs.EmrEndpoint | checksum }}.json
 - name: Check for CloudFormation error logs
   debug:
     var: emr.log
 - name: Encode bind credentials
   asb_encode_binding:
     fields:
-      RECORD_NAME: "{{ emr.stack_outputs.S3DataUri }}"
+      EMR_DATA_BUCKET: "{{ emr.stack_outputs.S3DataBucket }}"
+      EMR_APPLICATIONS: "{{ application_name }}"
+      EMR_REGION: "{{ region }}"
+      EMR_MASTER_ENDPOINT: "{{ emr.stack_outputs.EmrEndpoint }}"
   when: emr.log | length < 1

@@ -20,18 +20,14 @@ Parameters:
     Description: Must be a valid number
     Type: Number
     Default: 2
-  SubnetID:
-    Description: Must be Valid public subnet ID
-    Default: subnet-dba430ad
+  VpcId:
+    Description: Must be a valid VPC ID
+    Default: vpc-dba430ad
+    Type: "AWS::EC2::VPC::Id"
+  EMRCidr:
+    Description: CIDR Block for EMR subnet.
     Type: String
-  LogUri:
-    Description: Must be a valid S3 URL
-    Default: 's3://emrclusterlogbucket/'
-    Type: String
-  S3DataUri:
-    Description: 'Must be a valid S3 bucket URL '
-    Default: 's3://emrclusterdatabucket/'
-    Type: String
+    Default: 10.0.3.0/24
   ReleaseLabel:
     Description: Must be a valid EMR release  version
     Default: emr-5.7.0
@@ -39,12 +35,11 @@ Parameters:
   Applications:
     Description: >-
       Please select which application will be installed on the cluster this
-      would be either Ganglia and spark, or Ganglia and s3 acked Hbase
+      would be either Ganglia and spark, or Ganglia and s3 backed Hbase
     Type: String
     AllowedValues:
       - Spark
       - Hbase
-Mappings: {}
 Conditions:
   Spark: !Equals
     - !Ref Applications
@@ -53,6 +48,107 @@ Conditions:
     - !Ref Applications
     - Hbase
 Resources:
+  GetIgwRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument: |
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        }
+      Policies:
+        - PolicyName: GetIgwPolicy
+          PolicyDocument: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ec2:DescribeInternetGateways",
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+  GetIgwFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Runtime: python2.7
+      Role: !GetAtt GetIgwRole.Arn
+      Handler: index.handler
+      Timeout: 300
+      MemorySize: 128
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import traceback
+          from os import environ
+          def handler(event, context):
+            try:
+              ec2_client = boto3.client('ec2', region_name=environ['AWS_REGION'])
+              response_data = {
+                'IgwId': ec2_client.describe_internet_gateways(
+                  Filters=[
+                    {
+                      'Name': "attachment.vpc-id",
+                      'Values': [ event['ResourceProperties']['VpcId'] ]
+                    },
+                    {
+                      'Name': "attachment.state",
+                      'Values': ['available']}
+                  ]
+                )['InternetGateways'][0]['InternetGatewayId']
+              }
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data, "GetIgwPhysicalId")
+            except Exception:
+              cfnresponse.send(event, context, cfnresponse.FAILED, {}, "GetIgwPhysicalId")
+              traceback.print_exc()
+  GetIgw:
+    Type: "AWS::CloudFormation::CustomResource"
+    Version: 1.0,
+    Properties:
+      ServiceToken: !GetAtt GetIgwFunction.Arn
+      VpcId: !Ref VpcId
+  EMRRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref VpcId
+  EMRRoute:
+    Type: "AWS::EC2::Route"
+    Properties:
+      RouteTableId: !Ref EMRRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !GetAtt GetIgw.IgwId
+  EMRRouteTableAssoc:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref EMRRouteTable
+      SubnetId: !Ref EMRSubnet
+  EMRSubnet:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      CidrBlock: !Ref EMRCidr
+      VpcId: !Ref VpcId
+  LogBucket:
+    DeletionPolicy: Retain
+    Type: 'AWS::S3::Bucket'
+    Properties: {}
+  DataBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties: {}
   EMRCluster:
     DependsOn:
       - EMRClusterServiceRole
@@ -73,13 +169,13 @@ Resources:
       Configurations:
         - Classification: hbase-site
           ConfigurationProperties:
-            hbase.rootdir: !Ref S3DataUri
+            hbase.rootdir: !Sub "s3://${DataBucket}/"
         - Classification: hbase
           ConfigurationProperties:
             hbase.emr.storageMode: s3
       Instances:
         Ec2KeyName: !Ref KeyName
-        Ec2SubnetId: !Ref SubnetID
+        Ec2SubnetId: !Ref EMRSubnet
         MasterInstanceGroup:
           InstanceCount: 1
           InstanceType: !Ref MasterInstanceType
@@ -94,7 +190,7 @@ Resources:
       VisibleToAllUsers: true
       JobFlowRole: !Ref EMRClusterinstanceProfile
       ReleaseLabel: !Ref ReleaseLabel
-      LogUri: !Ref LogUri
+      LogUri: !Sub "s3://${LogBucket}/"
       Name: !Ref EMRClusterName
       AutoScalingRole: EMR_AutoScaling_DefaultRole
       ServiceRole: !Ref EMRClusterServiceRole
@@ -135,5 +231,7 @@ Resources:
       Roles:
         - !Ref EMRClusterinstanceProfileRole
 Outputs:
-  S3DataUri:
-    Value: !Ref S3DataUri
+  S3DataBucket:
+    Value: !Ref DataBucket
+  EmrEndpoint:
+    Value: !GetAtt EMRCluster.MasterPublicDNS
