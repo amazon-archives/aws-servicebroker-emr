@@ -235,3 +235,5 @@ Outputs:
     Value: !Ref DataBucket
   EmrEndpoint:
     Value: !GetAtt EMRCluster.MasterPublicDNS
+  EmrClusterId:
+    Value: !Ref EMRCluster
