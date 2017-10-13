@@ -147,6 +147,7 @@ Resources:
     Type: 'AWS::S3::Bucket'
     Properties: {}
   DataBucket:
+    DeletionPolicy: Retain
     Type: 'AWS::S3::Bucket'
     Properties: {}
   EMRCluster:
