@@ -51,6 +51,6 @@
       EMR_APPLICATIONS: "{{ application_name }}"
       EMR_REGION: "{{ region }}"
       EMR_MASTER_ENDPOINT: "{{ emr.stack_outputs.EmrEndpoint }}"
-      EMR_AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
-      EMR_AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
+      EMR_AWS_ACCESS_KEY_ID: "{{ iam_output.user_meta.access_keys[0].access_key_id }}"
+      EMR_AWS_SECRET_ACCESS_KEY: "{{ iam_output.user_meta.access_keys[0].secret_access_key }}"
   when: emr.log | length < 1
