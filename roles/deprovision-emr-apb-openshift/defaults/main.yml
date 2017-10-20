@@ -1,5 +1,2 @@
 application_name: "{{ namespace }}::{{ _apb_plan_id }}"
-# build this from vars until we can get cluster_url and ServiceInstance UID
-param_strings:
-  emr: "{{ namespace }}::{{ _apb_plan_id }}::{{ region }}::{{ aws_access_key }}::{{ aws_secret_key }}::{{ aws_cloudformation_role_arn }}::{{ KeyName }}::{{ EMRApplication }}::{{ EMRClusterName }}::{{ ReleaseLabel }}::{{ MasterInstanceType }}::{{ CoreInstanceType }}::{{ NumberOfCoreInstances }}::{{ VpcId }}::{{ EMRCidr }}"
-stack_suffix: "{{ param_strings | checksum }}"
+
