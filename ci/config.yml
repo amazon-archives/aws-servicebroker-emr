@@ -11,4 +11,5 @@ plans:
       MasterInstanceType: m4.xlarge
       CoreInstanceType: m4.xlarge
       NumberOfCoreInstances: 2
+      KeyName: cikey
     sample_app: emr-sample-app-apb
