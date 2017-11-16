@@ -68,11 +68,11 @@
 - name: Encode bind credentials
   asb_encode_binding:
     fields:
-      EMR_DATA_BUCKET: "{{ emr.stack_outputs.S3DataBucket }}"
-      EMR_APPLICATIONS: "{{ application_name }}"
-      EMR_REGION: "{{ region }}"
-      EMR_MASTER_ENDPOINT: "{{ emr.stack_outputs.EmrEndpoint }}"
-      EMR_CLUSTER_ID: "{{ emr.stack_outputs.EmrClusterId }}"
-      EMR_AWS_ACCESS_KEY_ID: "{{ iam_output.user_meta.access_keys[0].access_key_id }}"
+      EMR_DATA_BUCKET:           "{{ emr.stack_outputs.S3DataBucket }}"
+      EMR_APPLICATIONS:          "{{ EMRApplication }}"
+      EMR_REGION:                "{{ region }}"
+      EMR_MASTER_PUBLIC_DNS:     "{{ emr.stack_outputs.EmrEndpoint }}"
+      EMR_CLUSTER_ID:            "{{ emr.stack_outputs.EmrClusterId }}"
+      EMR_AWS_ACCESS_KEY_ID:     "{{ iam_output.user_meta.access_keys[0].access_key_id }}"
       EMR_AWS_SECRET_ACCESS_KEY: "{{ iam_output.user_meta.access_keys[0].secret_access_key }}"
   when: emr.log | length < 1
