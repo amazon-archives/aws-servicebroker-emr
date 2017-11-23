@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Best Practice EMR Cluster for Spark or S3 backed Hbase
+Description: 'Best Practice EMR Cluster for Spark or S3 backed Hbase. qs-1nt0fs92i'
 Parameters:
   EMRClusterName:
     Description: Name of the cluster
