@@ -11,7 +11,7 @@ metadata:
   imageUrl: "https://s3.amazonaws.com/thp-aws-icons-dev/Analytics_AmazonEMR_LARGE.png"
   longDescription: "Amazon Elastic Map reduce (Amazon EMR) provides a managed Hadoop framework that makes it easy, fast, and cost-effective to process vast amounts of data across dynamically scalable Amazon EC2 instances."
   documentationUrl: "https://aws.amazon.com/emr/"
-  providerDisplayName: "awsservicebroker"
+  providerDisplayName: "Amazon Web Services"
 plans:
   - name: emr-prod
     description: 'EMR Cluster with a production ready configuration'
